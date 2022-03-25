@@ -1,4 +1,4 @@
-echo "test start"
+echo "installation start"
 mkdir docker
 mkdir docs
 mkdir source
