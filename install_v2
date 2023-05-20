@@ -1,0 +1,99 @@
+@echo off
+echo "installation start"
+set /p projectName="Enter projectName(new-project default):"
+IF NOT DEFINED projectName SET "projectName=new-project"
+
+set /p installFrontend="Install frontend?: "
+IF NOT DEFINED installFrontend SET "installFrontend=N"
+
+
+
+mkdir %projectName%.local
+cd %projectName%.local
+
+
+mkdir docs
+mkdir source
+
+cd source
+mkdir prod
+mkdir dev
+mkdir frontend
+git init
+
+
+echo .idea > .gitignore
+echo .prod >> .gitignore
+echo .dev >> .gitignore
+echo .frontend >> .gitignore
+echo Readme.md >> .gitignore
+
+git add .
+git commit -m "start project"
+
+git checkout -b prod
+git checkout master
+git worktree add prod prod
+
+git checkout -b dev
+git checkout master
+git worktree add dev dev
+
+git checkout -b frontend
+git checkout master
+git worktree add frontend frontend
+
+cd prod
+mkdir public
+cd public
+echo ^<? phpinfo(); > index.php
+cd ../../dev
+mkdir public
+cd public
+echo ^<? phpinfo(); > index.php
+
+
+cd ../../frontend
+mkdir dist
+mkdir src
+
+IF /I %installFrontend%==Y (
+
+	call npm init -y
+	call npm install laravel-mix --save-dev
+	call npm install normalize.css
+
+	REM npm v8
+	call npm pkg set scripts.dev="npm run development"
+	call npm pkg set scripts.watch="mix watch"
+	call npm pkg set scripts.prod="npm run production"
+	call npm pkg set scripts.production="mix --production"
+
+	>webpack.mix.js (
+		echo const mix = require('laravel-mix'^);
+		echo mix.options({ processCssUrls: false }^)
+		echo mix.js('src/js/app.js', 'dist/js'^)
+		echo     .sass('src/scss/app.scss', 'dist/css'^);
+	)
+	
+
+)
+
+
+cd src
+mkdir js
+cd js
+copy NUL app.js
+
+cd ../
+mkdir scss
+cd scss
+copy NUL app.scss
+
+cd ../../dist
+mkdir img
+mkdir fonts
+copy NUL index.php
+
+
+pause
